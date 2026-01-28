@@ -1,34 +1,35 @@
-
 import React, { useState } from 'react';
-import { User } from '../../types';
-import { storage } from '../../services/StorageService';
 import { ShieldAlert, Lock, User as UserIcon, LogIn, Eye, EyeOff, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface AdminLoginProps {
-  onLogin: (user: User) => void;
-}
-
-const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
+const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  // Fix: storage.login is an async function, so handleSubmit must be async to await it.
-  const handleSubmit = async (e: React.FormEvent) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    try {
-      const user = await storage.login(username, password);
-      if (user && user.role === 'admin') {
-        onLogin(user);
-      } else {
-        setError('Access Denied: Invalid administrator credentials');
-      }
-    } catch (err) {
-      setError('An error occurred during authentication process.');
+    // ✅ Read admin credentials from Vite env
+    const adminIdentity = import.meta.env.VITE_ADMIN_IDENTITY;
+    const adminMasterKey = import.meta.env.VITE_ADMIN_MASTER_KEY;
+
+    if (!adminIdentity || !adminMasterKey) {
+      setError('Admin credentials are not configured');
+      return;
     }
+
+    if (username !== adminIdentity || password !== adminMasterKey) {
+      setError('Access Denied: Invalid administrator credentials');
+      return;
+    }
+
+    // ✅ SUCCESS → Go to Admin Dashboard
+    navigate('/admin/dashboard');
   };
 
   return (
@@ -39,13 +40,19 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <div className="w-20 h-20 bg-slate-100 text-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border-2 border-slate-50">
               <ShieldAlert size={40} />
             </div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">System Admin</h1>
-            <p className="text-slate-500 text-sm mt-2">Enter master credentials to access the console</p>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+              System Admin
+            </h1>
+            <p className="text-slate-500 text-sm mt-2">
+              Enter master credentials to access the console
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">Identity</label>
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+                Identity
+              </label>
               <div className="relative">
                 <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                 <input
@@ -59,11 +66,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">Master Key</label>
+              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+                Master Key
+              </label>
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-14 pr-14 py-4 rounded-2xl border-2 border-slate-100 focus:border-slate-900 outline-none transition-all font-bold"
@@ -80,7 +89,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-bold flex items-center space-x-3 animate-pulse">
+              <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-bold flex items-center space-x-3">
                 <Info size={18} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -93,11 +102,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
               <LogIn size={22} />
               <span>Unlock Console</span>
             </button>
-            
+
             <div className="text-center pt-4">
-               <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-                 Authorized Access Only
-               </p>
+              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                Authorized Access Only
+              </p>
             </div>
           </form>
         </div>
