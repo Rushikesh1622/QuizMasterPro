@@ -26,7 +26,10 @@ import { LayoutDashboard, LogOut, Trophy, Shield } from 'lucide-react';
 
 const SidebarLink = ({ to, icon: Icon, label }: any) => {
   const location = useLocation();
-  const isActive = location.pathname === to || location.pathname.startsWith(to);
+
+  const isActive =
+    location.pathname === to ||
+    (to === '/admin' && location.pathname.startsWith('/admin'));
 
   return (
     <Link
@@ -83,7 +86,7 @@ const AppLayout = ({
   );
 };
 
-/* ---------- ROUTER ---------- */
+/* ---------- ROUTER CONTENT ---------- */
 
 const RouterContent = ({
   user,
@@ -96,7 +99,7 @@ const RouterContent = ({
 
   const handleLogout = () => {
     storage.clearCurrentUser();
-    navigate('/');
+    window.location.hash = '#/';
   };
 
   return (
@@ -193,6 +196,8 @@ const RouterContent = ({
     </Routes>
   );
 };
+
+/* ---------- APP ROOT ---------- */
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(
