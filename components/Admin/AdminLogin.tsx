@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Lock, User as UserIcon, LogIn, Eye, EyeOff, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { User } from '../../types';
 
 interface AdminLoginProps {
@@ -11,6 +12,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,10 +27,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       return;
     }
 
-    if (
-      username.trim() !== adminIdentity ||
-      password !== adminMasterKey
-    ) {
+    if (username.trim() !== adminIdentity || password !== adminMasterKey) {
       setError('Access Denied: Invalid administrator credentials');
       return;
     }
@@ -39,8 +39,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       role: 'admin'
     };
 
-    console.log('ADMIN LOGIN SUCCESS:', adminUser); // debug (safe to remove later)
+    console.log('ADMIN LOGIN SUCCESS:', adminUser);
+
+    // 1️⃣ Update global app state
     onLogin(adminUser);
+
+    // 2️⃣ FORCE route re-evaluation (this is the missing piece)
+    navigate('/admin');
   };
 
   return (
