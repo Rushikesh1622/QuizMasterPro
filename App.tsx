@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { HashRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  useNavigate,
+  useLocation
+} from 'react-router-dom';
+
 import { User } from './types';
 import { storage } from './services/StorageService';
 
@@ -15,7 +24,7 @@ import { LayoutDashboard, LogOut, Trophy, Shield } from 'lucide-react';
 
 /* ---------- UI HELPERS ---------- */
 
-const SidebarLink = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
+const SidebarLink = ({ to, icon: Icon, label }: any) => {
   const location = useLocation();
   const isActive = location.pathname === to || location.pathname.startsWith(to);
 
@@ -32,13 +41,15 @@ const SidebarLink = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
   );
 };
 
-interface AppLayoutProps {
+const AppLayout = ({
+  children,
+  user,
+  onLogout
+}: {
   children: React.ReactNode;
   user: User;
   onLogout: () => void;
-}
-
-const AppLayout: React.FC<AppLayoutProps> = ({ children, user, onLogout }) => {
+}) => {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <aside className="hidden md:flex w-64 bg-white border-r p-6 flex-col">
@@ -72,7 +83,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, user, onLogout }) => {
   );
 };
 
-/* ---------- ROUTING ---------- */
+/* ---------- ROUTER ---------- */
 
 const RouterContent = ({
   user,
@@ -90,7 +101,21 @@ const RouterContent = ({
 
   return (
     <Routes>
-      {/* ADMIN ROUTES */}
+      {/* ---------- ROOT ---------- */}
+      <Route
+        path="/"
+        element={
+          !user ? (
+            <Login onLogin={handleLogin} />
+          ) : user.role === 'admin' ? (
+            <Navigate to="/admin" />
+          ) : (
+            <Navigate to="/user" />
+          )
+        }
+      />
+
+      {/* ---------- ADMIN ---------- */}
       <Route
         path="/admin"
         element={
@@ -130,16 +155,11 @@ const RouterContent = ({
         }
       />
 
-      {/* USER ROUTES */}
-      <Route
-        path="/"
-        element={user ? <Navigate to="/user" /> : <Login onLogin={handleLogin} />}
-      />
-
+      {/* ---------- USER ---------- */}
       <Route
         path="/user"
         element={
-          user ? (
+          user?.role === 'user' ? (
             <AppLayout user={user} onLogout={handleLogout}>
               <UserDashboard />
             </AppLayout>
@@ -154,6 +174,7 @@ const RouterContent = ({
         element={user ? <QuizSession user={user} /> : <Navigate to="/" />}
       />
 
+      {/* ---------- LEADERBOARD ---------- */}
       <Route
         path="/leaderboard"
         element={
@@ -167,13 +188,16 @@ const RouterContent = ({
         }
       />
 
+      {/* ---------- FALLBACK ---------- */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 };
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(storage.getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<User | null>(
+    storage.getCurrentUser()
+  );
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
@@ -186,4 +210,3 @@ export default function App() {
     </HashRouter>
   );
 }
-
