@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Lock, User as UserIcon, LogIn, Eye, EyeOff, Info } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { User } from '../../types';
 
-const AdminLogin: React.FC = () => {
+interface AdminLoginProps {
+  onLogin: (user: User) => void;
+}
+
+const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const navigate = useNavigate();
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // ✅ Read admin credentials from Vite env
     const adminIdentity = import.meta.env.VITE_ADMIN_IDENTITY;
     const adminMasterKey = import.meta.env.VITE_ADMIN_MASTER_KEY;
 
@@ -28,8 +29,12 @@ const AdminLogin: React.FC = () => {
       return;
     }
 
-    // ✅ SUCCESS → Go to Admin Dashboard
-    navigate('/admin/dashboard');
+    // ✅ THIS IS THE KEY FIX
+    onLogin({
+      id: 'admin',
+      username: adminIdentity,
+      role: 'admin'
+    });
   };
 
   return (
@@ -37,12 +42,10 @@ const AdminLogin: React.FC = () => {
       <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden">
         <div className="p-10">
           <div className="text-center mb-10">
-            <div className="w-20 h-20 bg-slate-100 text-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border-2 border-slate-50">
+            <div className="w-20 h-20 bg-slate-100 text-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
               <ShieldAlert size={40} />
             </div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">
-              System Admin
-            </h1>
+            <h1 className="text-3xl font-black text-slate-800">System Admin</h1>
             <p className="text-slate-500 text-sm mt-2">
               Enter master credentials to access the console
             </p>
@@ -50,64 +53,56 @@ const AdminLogin: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+              <label className="block text-xs font-black text-slate-400 uppercase mb-2">
                 Identity
               </label>
               <div className="relative">
-                <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-slate-900 outline-none transition-all font-bold"
-                  placeholder="Admin Username"
+                  className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 font-bold"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+              <label className="block text-xs font-black text-slate-400 uppercase mb-2">
                 Master Key
               </label>
               <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-14 pr-14 py-4 rounded-2xl border-2 border-slate-100 focus:border-slate-900 outline-none transition-all font-bold"
-                  placeholder="••••••••"
+                  className="w-full pl-14 pr-14 py-4 rounded-2xl border-2 font-bold"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600 transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-bold flex items-center space-x-3">
-                <Info size={18} className="shrink-0" />
+              <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-xs font-bold flex items-center space-x-2">
+                <Info size={18} />
                 <span>{error}</span>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-slate-900 hover:bg-black text-white font-black py-5 rounded-3xl shadow-2xl shadow-slate-200 transition-all flex items-center justify-center space-x-2 text-lg mt-4"
+              className="w-full bg-slate-900 text-white font-black py-5 rounded-3xl"
             >
-              <LogIn size={22} />
-              <span>Unlock Console</span>
+              <LogIn className="inline mr-2" />
+              Unlock Console
             </button>
-
-            <div className="text-center pt-4">
-              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-                Authorized Access Only
-              </p>
-            </div>
           </form>
         </div>
       </div>
