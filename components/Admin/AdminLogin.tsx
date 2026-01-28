@@ -24,17 +24,23 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
       return;
     }
 
-    if (username !== adminIdentity || password !== adminMasterKey) {
+    if (
+      username.trim() !== adminIdentity ||
+      password !== adminMasterKey
+    ) {
       setError('Access Denied: Invalid administrator credentials');
       return;
     }
 
-    // ✅ THIS IS THE KEY FIX
-    onLogin({
+    // ✅ SUCCESS: set admin user in app state
+    const adminUser: User = {
       id: 'admin',
       username: adminIdentity,
       role: 'admin'
-    });
+    };
+
+    console.log('ADMIN LOGIN SUCCESS:', adminUser); // debug (safe to remove later)
+    onLogin(adminUser);
   };
 
   return (
@@ -45,7 +51,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <div className="w-20 h-20 bg-slate-100 text-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
               <ShieldAlert size={40} />
             </div>
-            <h1 className="text-3xl font-black text-slate-800">System Admin</h1>
+            <h1 className="text-3xl font-black text-slate-800">
+              System Admin
+            </h1>
             <p className="text-slate-500 text-sm mt-2">
               Enter master credentials to access the console
             </p>
@@ -63,6 +71,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 font-bold"
+                  placeholder="admin"
                 />
               </div>
             </div>
