@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom';
 import { User } from './types';
 import { storage } from './services/StorageService';
@@ -11,7 +11,7 @@ import UserDashboard from './components/User/UserDashboard';
 import QuizSession from './components/User/QuizSession';
 import GlobalLeaderboard from './components/Leaderboard';
 
-import { LayoutDashboard, LogOut, Trophy, User as UserIcon, Shield } from 'lucide-react';
+import { LayoutDashboard, LogOut, Trophy, Shield } from 'lucide-react';
 
 /* ---------- UI HELPERS ---------- */
 
@@ -99,17 +99,7 @@ const RouterContent = ({
               <Dashboard />
             </AppLayout>
           ) : (
-            <AdminLogin
-              onLogin={() => {
-                const adminUser: User = {
-                  id: 'admin',
-                  username: 'admin',
-                  role: 'admin'
-                };
-                handleLogin(adminUser);
-                navigate('/admin');
-              }}
-            />
+            <AdminLogin onLogin={handleLogin} />
           )
         }
       />
@@ -161,9 +151,7 @@ const RouterContent = ({
 
       <Route
         path="/quiz/:id"
-        element={
-          user ? <QuizSession user={user} /> : <Navigate to="/" />
-        }
+        element={user ? <QuizSession user={user} /> : <Navigate to="/" />}
       />
 
       <Route
@@ -198,3 +186,4 @@ export default function App() {
     </HashRouter>
   );
 }
+
